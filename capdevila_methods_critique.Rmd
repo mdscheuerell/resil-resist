@@ -78,9 +78,39 @@ Y_t = Y_{t-1} + \mu + E_t + F_t - F_{t-1}.
 
 Here I show that this approach fails to recover the true changes in the log of population size from time step to another, and offer a different, but related, approach to do so.
 
+
 # Estimating population size
 
-There is a long history of estimating changes in population size from time series of count data, much of which is based upon a discrete-time Gompertz model `r citep(list("10.2307/2937041", "10.1073/pnas.081055898"))`.
+There is a long history of estimating changes in population size from time series of count data, much of which is based upon a stochastic, discrete-time Gompertz model `r citep(list("10.2307/2937041", "10.1073/pnas.081055898"))`. Beginning with the deterministic version of the model, 
+
+\begin{equation}
+n_t = n_{t-1} \exp[a + (b - 1) \log (n_{t-1}) ],
+\end{equation}
+
+where $n_t$ is the population size at time $t$, $a$ is the intrinsic rate of population growth, and $b$ is the strength of density dependence. When $b = 1$ the change in population size is density independent, and the strength of density dependence increased as $b \rightarrow 0$. On a log scale where $x_t = \log(n_t)$,
+
+\begin{equation}
+\begin{aligned}
+x_t &= x_{t-1} + a + (b - 1) x_{t-1} \\
+    &= a + b x_{t-1}.
+\end{aligned}
+\end{equation}
+
+Here the equilibrium population size is given by $a / (1 - b)$ for $b \neq 1$. The stochastic version of this model is a simple, first-order autoregressive process, AR(1), given by
+
+\begin{equation} \label{proc}
+x_t = a + b x_{t-1} + e_t,
+\end{equation}
+
+and $e_t \sim N(0, \sigma^2)$.
+
+It is well known that sampling or observation errors will lead to an estimate of $b$ that is biased low, suggesting the population is under greater density dependence than it is in reality. Thus, equation (\ref{proc}) is often combined with an explicit observation model to form a state-space model, whereby the observed log-counts $(y_t)$ are a function of the true population size plus some error, such that
+
+\begin{equation} \label{obs}
+y_t = x_t + v_t.
+\end{equation}
+
+
 
 
 
