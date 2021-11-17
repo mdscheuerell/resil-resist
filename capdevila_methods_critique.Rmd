@@ -1,5 +1,5 @@
 ---
-title: Critique of Capdevila et al. (2021) "Global patterns of resilience decline in vertebrate populations"
+title: Comment on Capdevila et al. (2021) "Global patterns of resilience decline in vertebrate populations"
 author:
   - Mark D. Scheuerell:
       email: scheuerl@uw.edu
@@ -44,7 +44,47 @@ This is version `r paste0('0.',format(Sys.time(), '%y.%m.%d'))`.
 
 # Background
 
-Capdevila et al. (2021) `r citet("10.1111/ele.13927")` Global patterns of resilience decline in vertebrate populations
+`r citet("10.1111/ele.13927")` use data from the Living Planet Database `r citep("10.1098/rstb.2004.1584")`, to evaluate temporal trends in what they refer to as resistance and recovery. Given a time series of counts, Capdevila et al. (2021) first calculate the change in population size from one time step to another as
+
+\begin{equation}
+r_t = \log \left( \frac{N_{t+1}}{N_t} \right),
+\end{equation}
+
+such that $r$ indicates whether a population is increasing $(r > 0)$, decreasing $(r < 0)$ or stable $(r = 0)$. They then refer to times when $r > 0$ as instances of recovery, and those when $r < 0$ as periods of resistance. Once the estimates of $r$ have been calculated, Capdevila et al. create two different time series of recovery and resistance.
+
+To estimate possible trends in recovery and resistance over time, Capdevila et al. use a state-space model for a biased random walk observed with error, whereby the true underlying change in population size is given by
+
+\begin{equation}
+r_t = r_{t-1} + \mu + E_t,
+\end{equation}
+
+where $\mu$ is the upward or downward bias over time and $E_t \sim N(0, \sigma^2)$. The observed (estimated) change in population size $(Y_t)$ is then given by
+
+\begin{equation}
+Y_t = r_t + F_t,
+\end{equation}
+
+where $F_t \sim N(0, \tau^2)$\footnote{I note here that Capdevila et al. incorrectly refer to $Y_t$ as the true change in population size, rather than $r_t$.}. Capdevila then claim that they can rearrange equation (3) and substitute it into equation (2), as apparently `r citet("10.1126/science.aba1289")` did, to arrive at
+
+\begin{equation}
+Y_t = Y_{t-1} + \mu + E_t + F_t.
+\end{equation}
+
+However, their algebra is incorrect and the combined equations should instead be
+
+\begin{equation}
+Y_t = Y_{t-1} + \mu + E_t + F_t - F_{t-1}.
+\end{equation}
+
+Here I show that this approach fails to recover the true changes in the log of population size from time step to another, and offer a different, but related, approach to do so.
+
+# Estimating population size
+
+There is a long history of estimating changes in population size from time series of count data, much of which is based upon a discrete-time Gompertz model `r citep(list("10.2307/2937041", "10.1073/pnas.081055898"))`.
+
+
+
+# Simulation study
 
 ```{r load_pkgs, message = FALSE, warning = FALSE}
 ## load libraries
