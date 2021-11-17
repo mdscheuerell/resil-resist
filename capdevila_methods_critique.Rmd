@@ -26,7 +26,7 @@ csl: "ecology-letters.csl"
 
 ```{r set_options, echo = FALSE, message = FALSE}
 options(width = 100)
-knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 ## load the package
 library("knitcitations")
@@ -121,56 +121,89 @@ r^*_t = \left( \frac{x_{t+1}}{x_t} \right).
 
 * length of time series (Capdevila claim 5 years is enough)
 
+* missing data
+
 
 # Simulation study
 
-```{r load_pkgs, message = FALSE, warning = FALSE}
+## Data
+
+Here I simulate some data to demonstrate the shortcoming of the method of Capdevila et al.
+
+```{r sim_data}
+## set random seed for reproducibility
+set.seed(123)
+## number of years of data
+tt <- 20
+## strength of density dependence
+bb <- 0.7
+## instrinsic growth rate
+aa <- 0.1
+## SD of process errors
+qq <- 0.6
+## SD of observation errors
+rr <- 0.4
+## time series of process errors
+ee <- rnorm(tt, 0, qq)
+## create time series of log-counts
+xx <- rep(NA, tt)
+xx[1] <- aa
+for(t in 2:tt) {
+  xx[t] <- aa + bb * xx[t-1] + ee[t]
+}
+## observed data
+yy <- rnorm(tt, xx, rr)
+```
+
+\vspace{0.25in}
+
+```{r plot_data, echo = FALSE, fig.dim = c(6, 4), fig.cap = "Time series of simulated true log-counts (gray) and the observed values (blue)."}
+## plot of states and observations
+plot.ts(xx, ylim = range(xx, yy), lwd = 2, las = 1,
+        col = "darkgray",
+        ylab = expression(paste(italic(x[t]), "  or  ", italic(y[t]))))
+lines(yy, lwd = 2, col = "blue")
+```
+
+## Model fitting
+
+I first fit the model described by Capdevila et al. and then fit the model described above and given by equations (\ref{proc}) and (\ref{obs}).
+
+```{r fit_model, message = FALSE, warning = FALSE, eval = FALSE}
 ## load libraries
 library("MARSS")
 
-## set random seed for reproducibility
-set.seed(123)
-
-##
-tt <- 20
-
-qq <- 0.6
-
-rr <- 0.3
-
-ww <- rnorm(tt, 0, qq)
-
-xx <- cumsum(ww)
-
-yy <- rnorm(tt, xx, rr)
-
-plot.ts(cbind(xx, yy))
-
-
-zz <- diff(yy)
-
-plot.ts(zz)
-
-
-plot(zz, ww[-1])
-
-
-library(MARSS)
-
+## define model structure
 mod_list <- list(
-B = matrix("b"),
-U = matrix("u"),
-Q = matrix("q"),
-Z = matrix(1),
-A = matrix(0),
-R = matrix("r")
+  B = matrix("b"),
+  U = matrix("u"),
+  Q = matrix("q"),
+  Z = matrix(1),
+  A = matrix(0),
+  R = matrix("r")
 )
 
+## define control params
 con_list <- list(maxit = 2000)
 
-mod_fit <- MARSS(matrix(zz, nrow = 1), model = mod_list, control = con_list)
+## fit the model
+mod_fit <- MARSS(matrix(yy, nrow = 1), model = mod_list, control = con_list)
 
-cor(t(mod_fit$states), ww[-1])
+
+## Capdevila estimates of r
+rr <- diff(yy)
+
+## my estimate of r
+
+
+
+plot.ts(rr)
+
+
+plot(rr)
+
+
+cor(t(mod_fit$states), rr[-1])
 
 ```
 
