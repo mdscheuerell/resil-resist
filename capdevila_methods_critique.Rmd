@@ -58,13 +58,13 @@ To estimate possible trends in recovery and resistance over time, Capdevila et a
 r_t = r_{t-1} + \mu + E_t,
 \end{equation}
 
-where $\mu$ is the upward or downward bias over time and $E_t \sim N(0, \sigma^2)$. The observed (estimated) change in population size $(Y_t)$ is then given by
+where $\mu$ is the upward or downward bias over time and $E_t \sim \text{N}(0, \sigma^2)$. The observed (estimated) change in population size $(Y_t)$ is then given by
 
 \begin{equation}
 Y_t = r_t + F_t,
 \end{equation}
 
-where $F_t \sim N(0, \tau^2)$\footnote{I note here that Capdevila et al. incorrectly refer to $Y_t$ as the true change in population size, rather than $r_t$.}. Capdevila then claim that they can rearrange equation (3) and substitute it into equation (2), as apparently `r citet("10.1126/science.aba1289")` did, to arrive at
+where $F_t \sim \text{N}(0, \tau^2)$\footnote{I note here that Capdevila et al. incorrectly refer to $Y_t$ as the true change in population size, rather than $r_t$.}. Capdevila then claim that they can rearrange equation (3) and substitute it into equation (2), as apparently `r citet("10.1126/science.aba1289")` did, to arrive at
 
 \begin{equation}
 Y_t = Y_{t-1} + \mu + E_t + F_t.
@@ -102,16 +102,24 @@ Here the equilibrium population size is given by $a / (1 - b)$ for $b \neq 1$. T
 x_t = a + b x_{t-1} + e_t,
 \end{equation}
 
-and $e_t \sim N(0, \sigma^2)$.
+and $e_t \sim \text{N}(0, \sigma^2)$.
 
 It is well known that sampling or observation errors will lead to an estimate of $b$ that is biased low, suggesting the population is under greater density dependence than it is in reality. Thus, equation (\ref{proc}) is often combined with an explicit observation model to form a state-space model, whereby the observed log-counts $(y_t)$ are a function of the true population size plus some error, such that
 
 \begin{equation} \label{obs}
-y_t = x_t + v_t.
+y_t = x_t + v_t,
+\end{equation}
+
+and $v_t \sim \text{N}(0, \tau^2)$. Thus, rather than estimate the changes in population size from one time step to another from the observed counts, as Capdevila did with equation (1), the correct way to do so would be to fit the state-space model given by equations (\ref{proc}) and (\ref{obs}), and then use the estimates of $x_t$ to examine changes population size over time, where
+
+\begin{equation}
+r^*_t = \left( \frac{x_{t+1}}{x_t} \right).
 \end{equation}
 
 
+# Other issues to consider
 
+* length of time series (Capdevila claim 5 years is enough)
 
 
 # Simulation study
@@ -119,6 +127,51 @@ y_t = x_t + v_t.
 ```{r load_pkgs, message = FALSE, warning = FALSE}
 ## load libraries
 library("MARSS")
+
+## set random seed for reproducibility
+set.seed(123)
+
+##
+tt <- 20
+
+qq <- 0.6
+
+rr <- 0.3
+
+ww <- rnorm(tt, 0, qq)
+
+xx <- cumsum(ww)
+
+yy <- rnorm(tt, xx, rr)
+
+plot.ts(cbind(xx, yy))
+
+
+zz <- diff(yy)
+
+plot.ts(zz)
+
+
+plot(zz, ww[-1])
+
+
+library(MARSS)
+
+mod_list <- list(
+B = matrix("b"),
+U = matrix("u"),
+Q = matrix("q"),
+Z = matrix(1),
+A = matrix(0),
+R = matrix("r")
+)
+
+con_list <- list(maxit = 2000)
+
+mod_fit <- MARSS(matrix(zz, nrow = 1), model = mod_list, control = con_list)
+
+cor(t(mod_fit$states), ww[-1])
+
 ```
 
 
