@@ -132,17 +132,17 @@ Here I simulate some data to demonstrate the shortcoming of the method of Capdev
 
 ```{r sim_data}
 ## set random seed for reproducibility
-set.seed(123)
+set.seed(666)
 ## number of years of data
 tt <- 20
 ## strength of density dependence
 bb <- 0.7
 ## instrinsic growth rate
-aa <- 0.1
+aa <- 0.2
 ## SD of process errors
-qq <- 0.6
+qq <- sqrt(0.3)
 ## SD of observation errors
-rr <- 0.4
+rr <- sqrt(0.6)
 ## time series of process errors
 ee <- rnorm(tt, 0, qq)
 ## create time series of log-counts
@@ -169,8 +169,27 @@ lines(yy, lwd = 2, col = "blue")
 
 I first fit the model described by Capdevila et al. and then fit the model described above and given by equations (\ref{proc}) and (\ref{obs}).
 
-```{r fit_model, message = FALSE, warning = FALSE, eval = FALSE}
-## load libraries
+```{r fit_model, message = FALSE, warning = FALSE}
+## time series of Capdevila estimates of r
+rC <- yy[-1] - yy[-tt]
+## time series of estimated recovery and resistance
+rec_C <- res_C <- rC
+rec_C[rC < 0] <- NA
+res_C[rC > 0] <- NA
+  
+## time series of true r
+rT <- xx[-1] - xx[-tt]
+## time series of true recovery and resistance
+rec_T <- res_T <- rT
+rec_T[rT < 0] <- NA
+res_T[rT > 0] <- NA
+
+## correlation between Capdevila estimates and truth
+round(cor(rec_C, rec_T, use = "pairwise.complete.obs"), 2)
+round(cor(res_C, res_T, use = "pairwise.complete.obs"), 2)
+
+
+## load library
 library("MARSS")
 
 ## define model structure
@@ -186,24 +205,32 @@ mod_list <- list(
 ## define control params
 con_list <- list(maxit = 2000)
 
-## fit the model
-mod_fit <- MARSS(matrix(yy, nrow = 1), model = mod_list, control = con_list)
+mod_fit <- MARSS(matrix(yy, nrow = 1),
+                 model = mod_list,
+                 control = con_list)
+
+xfit <- t(mod_fit$states)
+## time series of proposed estimates of r
+rP <- xfit[-1] - xfit[-tt]
+## time series of estimated recovery and resistance
+rec_P <- res_P <- rP
+rec_P[rP < 0] <- NA
+res_P[rP > 0] <- NA
+  
+## correlation between Capdevila estimates and truth
+round(cor(rec_P, rec_T, use = "pairwise.complete.obs"), 2)
+round(cor(res_P, res_T, use = "pairwise.complete.obs"), 2)
 
 
-## Capdevila estimates of r
-rr <- diff(yy)
-
-## my estimate of r
-
-
-
-plot.ts(rr)
-
-
-plot(rr)
-
-
-cor(t(mod_fit$states), rr[-1])
+## fit Capdevila models
+## recovery
+# recov_fit <- MARSS(matrix(rec_C, nrow = 1),
+#                    model = mod_list,
+#                    control = con_list)
+## resistance
+# resist_fit <- MARSS(matrix(res_C, nrow = 1),
+#                     model = mod_list,
+#                     control = con_list)
 
 ```
 
