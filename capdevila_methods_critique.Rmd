@@ -1,0 +1,61 @@
+---
+title: Critique of Capdevila et al. (2021) "Global patterns of resilience decline in vertebrate populations"
+author:
+  - Mark D. Scheuerell:
+      email: scheuerl@uw.edu
+      institute: wacfwru
+      correspondence: true
+institute:
+  - wacfwru: U.S. Geological Survey Washington Cooperative Fish and Wildlife Research Unit, School of Aquatic and Fishery Sciences, University of Washington, Seattle, WA
+output:
+  pdf_document:
+    highlight: haddock
+    pandoc_args:
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'
+documentclass: article
+geometry: margin=1in
+linestretch: 1.1
+fontsize: 12pt
+header-includes:
+  - \usepackage{lineno}
+  - \linenumbers
+bibliography: "references.bib"
+csl: "ecology-letters.csl"
+---
+
+```{r set_options, echo = FALSE, message = FALSE}
+options(width = 100)
+knitr::opts_chunk$set(message = FALSE)
+
+## load the package
+library("knitcitations")
+
+## clean out any existing .bib files
+cleanbib()
+
+## set pandoc for formatting
+options("citation_format" = "pandoc")
+```
+
+\vspace{0.2in}
+
+This is version `r paste0('0.',format(Sys.time(), '%y.%m.%d'))`.
+
+# Background
+
+Capdevila et al. (2021) `r citet("10.1111/ele.13927")` Global patterns of resilience decline in vertebrate populations
+
+```{r load_pkgs, message = FALSE, warning = FALSE}
+## load libraries
+library("MARSS")
+```
+
+
+# References
+
+```{r, echo = FALSE, message = FALSE}
+## create ref cited section
+write.bibtex(file = "references.bib")
+```
+
